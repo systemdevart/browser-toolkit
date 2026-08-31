@@ -7,13 +7,19 @@ try {
   );
 }
 
-for (const script of ["vocab.js", "vocab-c1.js", "vocab-c2.js", "vocab-pte.js"]) {
+for (const script of [
+  "vocab.js",
+  "vocab-c1.js",
+  "vocab-c2.js",
+  "vocab-pte.js",
+  "vocab-fr-basic.js",
+]) {
   try {
     importScripts(script);
   } catch (error) {
     console.warn(
       `LiterateGoggles: unable to load ${script} in background script.`,
-      error,
+      error
     );
   }
 }
@@ -28,18 +34,18 @@ const VOCAB_ALARM_NAME = "literategoggles.vocab.tick";
 const VOCAB_INTERVAL_MINUTES = 15;
 const VOCAB_NOTIFICATION_ID = "literategoggles-vocab-notification";
 
-function getVocab() {
+function getVocabSource() {
   const lg = globalThis.LiterateGoggles || {};
   if (Array.isArray(lg.vocab) && lg.vocab.length) {
-    return lg.vocab;
+    return { items: lg.vocab };
   }
   if (Array.isArray(lg.vocabSources)) {
     const first = lg.vocabSources.find(
-      (s) => s && Array.isArray(s.items) && s.items.length,
+      (s) => s && Array.isArray(s.items) && s.items.length
     );
-    if (first) return first.items;
+    if (first) return first;
   }
-  return [];
+  return { items: [] };
 }
 
 function updateIcon(isEnabled) {
@@ -80,7 +86,8 @@ async function readVocabSettings() {
 
 async function ensureVocabAlarm() {
   const { globalEnabled, vocabEnabled } = await readVocabSettings();
-  const shouldRun = globalEnabled && vocabEnabled && getVocab().length > 0;
+  const shouldRun =
+    globalEnabled && vocabEnabled && getVocabSource().items.length > 0;
   const existing = await chrome.alarms.get(VOCAB_ALARM_NAME);
   if (shouldRun) {
     if (!existing) {
@@ -107,19 +114,31 @@ function shuffle(items) {
   return copy;
 }
 
-function buildQuizPayload(item) {
+function buildQuizPayload(item, source) {
   const options = shuffle([item.correct, ...item.wrong]);
   return {
     word: item.word,
+    base: typeof item.base === "string" ? item.base : "",
+    pronunciation:
+      typeof item.pronunciation === "string" ? item.pronunciation : "",
     correct: item.correct,
     options,
     examples: Array.isArray(item.examples) ? item.examples : [],
+    speechLang: source.speechLang || "en-GB",
+    speechLabel: source.speechLabel || "British English",
+    speechRate: source.speechRate || 0.92,
+    exampleLabel: source.exampleLabel || "Used in a sentence",
+    sourceUrl: source.sourceUrl || "",
+    attribution: source.attribution || "",
+    license: source.license || "",
+    licenseUrl: source.licenseUrl || "",
     generatedAt: Date.now(),
   };
 }
 
 async function pickNextWord() {
-  const vocab = getVocab();
+  const source = getVocabSource();
+  const vocab = source.items;
   if (!vocab.length) {
     return null;
   }
@@ -128,7 +147,7 @@ async function pickNextWord() {
   const item = vocab[nextIndex];
   await chrome.storage.local.set({
     [VOCAB_INDEX_KEY]: (nextIndex + 1) % vocab.length,
-    [VOCAB_CURRENT_KEY]: buildQuizPayload(item),
+    [VOCAB_CURRENT_KEY]: buildQuizPayload(item, source),
   });
   return item;
 }

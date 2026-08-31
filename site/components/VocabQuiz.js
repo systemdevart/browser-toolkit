@@ -7,6 +7,7 @@ const VOCAB_FILES = [
   { file: "vocab-c1.json" },
   { file: "vocab-c2.json" },
   { file: "vocab-pte.json" },
+  { file: "vocab-fr-basic.json" },
 ];
 
 const BANS_API = "/api/vocab/bans";
@@ -69,41 +70,55 @@ function quizFromItem(item) {
   return {
     word: item.word,
     base: typeof item.base === "string" ? item.base.trim() : "",
+    pronunciation:
+      typeof item.pronunciation === "string" ? item.pronunciation.trim() : "",
     correct: item.correct,
     options: shuffle([item.correct, ...item.wrong]),
     examples: Array.isArray(item.examples) ? item.examples : [],
   };
 }
 
-function pickBritishVoice() {
+function pickVoice(language) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     return null;
   }
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
+  const requested = language || "en-GB";
+  const prefix = requested.split("-")[0].toLowerCase();
+  const exact = (voice) => voice.lang.toLowerCase() === requested.toLowerCase();
+  const sameLanguage = (voice) =>
+    voice.lang.toLowerCase().split("-")[0] === prefix;
   return (
-    voices.find((v) => v.lang === "en-GB" && /Google/i.test(v.name)) ||
     voices.find(
-      (v) => v.lang === "en-GB" && /Daniel|Kate|Serena|Oliver|Arthur/i.test(v.name),
+      (voice) => exact(voice) && /Google|Microsoft|Apple/i.test(voice.name)
     ) ||
-    voices.find((v) => v.lang === "en-GB") ||
-    voices.find((v) => /^en-GB/i.test(v.lang)) ||
-    voices.find((v) => /British|UK/i.test(v.name)) ||
+    voices.find(exact) ||
+    voices.find(
+      (voice) =>
+        sameLanguage(voice) && /Google|Microsoft|Apple/i.test(voice.name)
+    ) ||
+    voices.find(sameLanguage) ||
     null
   );
 }
 
-function speakWord(text) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window) || !text) {
+function speakWord(text, source) {
+  if (
+    typeof window === "undefined" ||
+    !("speechSynthesis" in window) ||
+    !text
+  ) {
     return;
   }
   try {
+    const language = source?.speechLang || "en-GB";
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-GB";
-    utter.rate = 0.92;
+    utter.lang = language;
+    utter.rate = Number(source?.speechRate) || 0.92;
     utter.pitch = 1;
-    const voice = pickBritishVoice();
+    const voice = pickVoice(language);
     if (voice) utter.voice = voice;
     window.speechSynthesis.speak(utter);
   } catch (error) {
@@ -132,8 +147,8 @@ export default function VocabQuiz() {
       VOCAB_FILES.map(({ file }) =>
         fetch(`/vocab/${file}`, { cache: "no-store" })
           .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
+          .catch(() => null)
+      )
     ).then((results) => {
       if (cancelled) return;
       const loaded = results
@@ -143,11 +158,19 @@ export default function VocabQuiz() {
             payload.meta &&
             payload.meta.id &&
             Array.isArray(payload.items) &&
-            payload.items.length,
+            payload.items.length
         )
         .map((payload) => ({
           id: payload.meta.id,
           name: payload.meta.name || payload.meta.id,
+          speechLang: payload.meta.speechLang || "en-GB",
+          speechLabel: payload.meta.speechLabel || "British English",
+          speechRate: payload.meta.speechRate || 0.92,
+          exampleLabel: payload.meta.exampleLabel || "Used in a sentence",
+          sourceUrl: payload.meta.sourceUrl || "",
+          attribution: payload.meta.attribution || "",
+          license: payload.meta.license || "",
+          licenseUrl: payload.meta.licenseUrl || "",
           items: payload.items,
         }));
       setSources(loaded);
@@ -172,7 +195,7 @@ export default function VocabQuiz() {
 
   const activeSource = useMemo(
     () => sources.find((s) => s.id === sourceId) || sources[0] || null,
-    [sources, sourceId],
+    [sources, sourceId]
   );
 
   // Fetch shared bans from the backend once (and whenever the source set changes).
@@ -196,7 +219,7 @@ export default function VocabQuiz() {
     if (!activeSource) return [];
     if (!activeBanned.size) return activeSource.items;
     return activeSource.items.filter(
-      (item) => !activeBanned.has(String(item.word).toLowerCase()),
+      (item) => !activeBanned.has(String(item.word).toLowerCase())
     );
   }, [activeSource, activeBanned]);
 
@@ -234,8 +257,7 @@ export default function VocabQuiz() {
   }, [activeSource, bannedBySource]);
 
   const isCurrentBanned =
-    !!currentQuiz &&
-    activeBanned.has(String(currentQuiz.word).toLowerCase());
+    !!currentQuiz && activeBanned.has(String(currentQuiz.word).toLowerCase());
 
   const startSingle = useCallback(() => {
     if (!activeItems.length) return;
@@ -247,8 +269,8 @@ export default function VocabQuiz() {
     setCurrentQuiz(quiz);
     setRevealed(false);
     setPickedOption(null);
-    speakWord(quiz.word);
-  }, [activeItems]);
+    speakWord(quiz.word, activeSource);
+  }, [activeItems, activeSource]);
 
   const startSession = useCallback(() => {
     if (!activeItems.length) return;
@@ -270,8 +292,8 @@ export default function VocabQuiz() {
     setCurrentQuiz(firstQuiz);
     setRevealed(false);
     setPickedOption(null);
-    speakWord(firstQuiz.word);
-  }, [activeItems]);
+    speakWord(firstQuiz.word, activeSource);
+  }, [activeItems, activeSource]);
 
   const advance = useCallback(() => {
     if (session) {
@@ -288,11 +310,11 @@ export default function VocabQuiz() {
       setCurrentQuiz(quiz);
       setRevealed(false);
       setPickedOption(null);
-      speakWord(quiz.word);
+      speakWord(quiz.word, activeSource);
     } else if (mode === "single") {
       startSingle();
     }
-  }, [session, activeItems, mode, startSingle]);
+  }, [session, activeItems, mode, startSingle, activeSource]);
 
   const handleAnswer = useCallback(
     (option) => {
@@ -307,13 +329,13 @@ export default function VocabQuiz() {
                 answered: prev.answered + 1,
                 correct: prev.correct + (isCorrect ? 1 : 0),
               }
-            : prev,
+            : prev
         );
       }
       // Focus the "Next" button so the user can hit Enter/Space to advance.
       setTimeout(() => nextRef.current?.focus(), 0);
     },
-    [currentQuiz, pickedOption, session],
+    [currentQuiz, pickedOption, session]
   );
 
   const reset = useCallback(() => {
@@ -330,8 +352,8 @@ export default function VocabQuiz() {
     return (
       <div className="vocab-card">
         <div className="vocab-empty">
-          Loading vocab… If nothing appears, no vocab JSON files were built
-          into <code>/vocab/</code>. Run <code>npm run extract-vocab</code> and
+          Loading vocab… If nothing appears, no vocab JSON files were built into{" "}
+          <code>/vocab/</code>. Run <code>npm run extract-vocab</code> and
           rebuild.
         </div>
       </div>
@@ -375,6 +397,27 @@ export default function VocabQuiz() {
         )}
       </div>
 
+      {activeSource?.attribution && (
+        <div className="vocab-source-attribution">
+          Source:{" "}
+          <a href={activeSource.sourceUrl} target="_blank" rel="noreferrer">
+            {activeSource.attribution}
+          </a>
+          {activeSource.license && (
+            <>
+              {" - "}
+              <a
+                href={activeSource.licenseUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {activeSource.license}
+              </a>
+            </>
+          )}
+        </div>
+      )}
+
       {mode === "idle" && (
         <div className="vocab-controls">
           <button
@@ -417,16 +460,21 @@ export default function VocabQuiz() {
                 currentQuiz.word.toLowerCase() && (
                 <div className="vocab-base">base: {currentQuiz.base}</div>
               )}
+            {currentQuiz.pronunciation && (
+              <div className="vocab-pronunciation">
+                Pronunciation: {currentQuiz.pronunciation}
+              </div>
+            )}
             {speechSupported && (
               <button
                 type="button"
                 className="vocab-speak"
-                onClick={() => speakWord(currentQuiz.word)}
-                title="Play pronunciation (British)"
-                aria-label="Play pronunciation (British)"
+                onClick={() => speakWord(currentQuiz.word, activeSource)}
+                title={`Play pronunciation (${activeSource.speechLabel})`}
+                aria-label={`Play pronunciation (${activeSource.speechLabel})`}
               >
                 <span aria-hidden="true">🔊</span>
-                <span>Play (British)</span>
+                <span>Play ({activeSource.speechLabel})</span>
               </button>
             )}
           </div>
@@ -486,7 +534,9 @@ export default function VocabQuiz() {
 
               {currentQuiz.examples.length > 0 && (
                 <div className="vocab-examples">
-                  <div className="vocab-examples-title">Used in a sentence</div>
+                  <div className="vocab-examples-title">
+                    {activeSource.exampleLabel}
+                  </div>
                   <ol className="vocab-examples-list">
                     {currentQuiz.examples.map((sentence, i) => (
                       <li key={i}>{sentence}</li>

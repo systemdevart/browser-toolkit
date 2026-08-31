@@ -265,6 +265,24 @@ button {
   font-style: italic;
 }
 
+.vocab-pronunciation {
+  font-size: 13px;
+  color: var(--muted-text);
+}
+
+.vocab-source-attribution {
+  color: var(--muted-text);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.vocab-source-attribution a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .vocab-speak {
   display: inline-flex;
   align-items: center;
@@ -814,9 +832,7 @@ button {
   height: 14px;
 }
 
-.ielts-spoken-topic[data-state="playing-topic"]
-  .ielts-spoken-topic-mark
-  span {
+.ielts-spoken-topic[data-state="playing-topic"] .ielts-spoken-topic-mark span {
   animation: ielts-spoken-wave 700ms ease-in-out infinite alternate;
 }
 
@@ -2595,7 +2611,10 @@ button {
   min-height: 125px;
   padding: 13px;
   resize: vertical;
-  font: 13px/1.65 Georgia, "Times New Roman", serif;
+  font:
+    13px/1.65 Georgia,
+    "Times New Roman",
+    serif;
 }
 
 .concept-memory-card > textarea:focus,
@@ -2653,7 +2672,10 @@ button {
 .concept-memory-comparison p {
   margin-top: 7px;
   color: #344b48;
-  font: 12px/1.62 Georgia, "Times New Roman", serif;
+  font:
+    12px/1.62 Georgia,
+    "Times New Roman",
+    serif;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -2918,7 +2940,10 @@ button {
 .concept-memory-form input,
 .concept-memory-form textarea {
   padding: 11px 12px;
-  font: 12px/1.55 Georgia, "Times New Roman", serif;
+  font:
+    12px/1.55 Georgia,
+    "Times New Roman",
+    serif;
 }
 
 .concept-memory-form textarea {
@@ -4921,11 +4946,7 @@ button {
   overflow: hidden;
   border-color: rgba(73, 83, 62, 0.17);
   background:
-    radial-gradient(
-      circle at 4% 95%,
-      rgba(182, 110, 71, 0.1),
-      transparent 32%
-    ),
+    radial-gradient(circle at 4% 95%, rgba(182, 110, 71, 0.1), transparent 32%),
     #f6f3e9;
 }
 
@@ -5057,7 +5078,10 @@ button {
   border-radius: 10px;
   color: #223f3b;
   background: rgba(255, 255, 255, 0.68);
-  font: 13px Georgia, "Times New Roman", serif;
+  font:
+    13px Georgia,
+    "Times New Roman",
+    serif;
   outline: none;
 }
 

@@ -30,6 +30,13 @@ soon as playback ends. In speaking feedback, show the full transcript followed
 by a complete band-7.5 version that preserves my ideas and wording and makes
 only the smallest necessary changes.
 
+## Vocabulary
+
+Keep the existing English vocabulary pools and a separate French A1 pool with
+the 1,000 most basic words, Russian answer choices, a simple pronunciation hint,
+and standard French browser speech. Preserve source attribution for imported
+word lists.
+
 ## Daily focus timers
 
 Keep separate 25-minute timers for reading English books and Russian books.
@@ -43,7 +50,8 @@ run at a time and only one completion per activity per day.
 Keep concept creation collapsed by default. Let me save only a target concept.
 On every due date, use the advanced OpenAI model to create a new self-contained
 identification question without writing the concept, an inflection, or an
-obvious spelling clue. For given names and surnames, ask through etymology.
+obvious spelling clue. Write every question in Russian, regardless of the
+concept's language or origin. For given names and surnames, ask through etymology.
 Persist that day's question, require an answer before revealing the concept,
 and never reuse an earlier question. Use successful-recall gaps of 1, 3, 7, 14,
 30, 60, and 120 days; a failed recall repeats the same step tomorrow. After the
@@ -51,6 +59,9 @@ final successful recall, remove the concept from the active queue and retain it
 only as fully remembered history.
 
 ## Chess drills
+
+Keep this repertoire-recall block hidden from the daily page until I ask to
+restore it. Preserve its implementation and stored progress for later work.
 
 Pull the latest 100 standard games for `unlimited_bezdarnost` from Chess.com
 and prepare ten repertoire-recall positions every day: five matched positions
@@ -125,7 +136,7 @@ repeating previously covered research.
 Prepare three source-based problems every day for each scheduled subject:
 mathematical analysis, linear algebra, Leningrad mathematical circles, deep
 learning foundations, statistical learning, pen-and-paper ML, ML system
-design, algorithms, ML mathematics, and proof practice.
+design, ML mathematics, and proof practice.
 
 - Ground each set in a complete legitimate book or author-provided source
   cached by the backend. For a commercial book without a legal full download,
@@ -144,9 +155,6 @@ design, algorithms, ML mathematics, and proof practice.
   warm-up, core, and stretch problem.
 - Show a hint, an educational worked solution, and a modified follow-up with
   its own solution. Render all notation with KaTeX.
-- For Algorithm day, use one problem from Competitive Programmer's Handbook,
-  one LeetCode Medium problem, and one LeetCode Hard problem. Include runnable
-  Python 3 for each main problem and follow-up.
 - Record whether I open each worked solution. Treat an unopened solution as an
   unsolved problem and carry that problem into the next daily set at the same
   difficulty. Replace it only after its worked solution has been opened.

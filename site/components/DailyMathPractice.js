@@ -6,15 +6,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 function MathText({ children }) {
   const parts = useMemo(
     () => String(children || "").split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g),
-    [children],
+    [children]
   );
 
   return (
     <span className="math-text">
       {parts.map((part, index) => {
         const display = part.startsWith("$$") && part.endsWith("$$");
-        const inline =
-          !display && part.startsWith("$") && part.endsWith("$");
+        const inline = !display && part.startsWith("$") && part.endsWith("$");
         if (!display && !inline) {
           return <span key={`${index}-${part.slice(0, 12)}`}>{part}</span>;
         }
@@ -80,8 +79,7 @@ function Solution({ steps, finalAnswer, pythonSolution }) {
 function ProblemCard({ problem, index, onSolutionOpened }) {
   const [trackingState, setTrackingState] = useState("idle");
   const [trackingError, setTrackingError] = useState("");
-  const solutionOpened =
-    problem.solutionOpened || trackingState === "saved";
+  const solutionOpened = problem.solutionOpened || trackingState === "saved";
 
   const recordSolutionOpened = useCallback(async () => {
     if (solutionOpened || trackingState === "saving") return;
@@ -93,15 +91,10 @@ function ProblemCard({ problem, index, onSolutionOpened }) {
     } catch (saveError) {
       setTrackingState("error");
       setTrackingError(
-        saveError.message || "The solution view could not be saved.",
+        saveError.message || "The solution view could not be saved."
       );
     }
-  }, [
-    onSolutionOpened,
-    problem.id,
-    solutionOpened,
-    trackingState,
-  ]);
+  }, [onSolutionOpened, problem.id, solutionOpened, trackingState]);
 
   return (
     <article className="math-problem-card">
@@ -109,7 +102,9 @@ function ProblemCard({ problem, index, onSolutionOpened }) {
         <span className="math-problem-number">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className={`math-difficulty math-difficulty-${problem.difficulty}`}>
+        <span
+          className={`math-difficulty math-difficulty-${problem.difficulty}`}
+        >
           {problem.difficulty}
         </span>
       </div>
@@ -122,9 +117,7 @@ function ProblemCard({ problem, index, onSolutionOpened }) {
         target="_blank"
         rel="noreferrer"
       >
-        {problem.sourceType === "leetcode"
-          ? `LeetCode ${problem.sourceDifficulty}`
-          : "Source book"}
+        Source book
         <span>{problem.sourceTitle}</span>
         <span aria-hidden="true">↗</span>
       </a>
@@ -229,7 +222,7 @@ export default function DailyMathPractice() {
       setPayload(next);
       setActiveSubjectId((current) => {
         const stillExists = next.digest.subjects.some(
-          (subject) => subject.subjectId === current,
+          (subject) => subject.subjectId === current
         );
         return stillExists ? current : next.digest.subjects[0]?.subjectId || "";
       });
@@ -252,7 +245,7 @@ export default function DailyMathPractice() {
     subjects[0];
   const problemCount = subjects.reduce(
     (total, subject) => total + subject.problems.length,
-    0,
+    0
   );
   const recordSolutionOpened = useCallback(async (problemId) => {
     const response = await fetch(
@@ -261,7 +254,7 @@ export default function DailyMathPractice() {
         method: "POST",
         cache: "no-store",
         keepalive: true,
-      },
+      }
     );
     if (!response.ok) throw new Error(await responseError(response));
     const saved = await response.json();
@@ -280,7 +273,7 @@ export default function DailyMathPractice() {
                     solutionOpened: true,
                     solutionOpenedAt: saved.solutionOpenedAt,
                   }
-                : problem,
+                : problem
             ),
           })),
         },

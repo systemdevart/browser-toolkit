@@ -121,6 +121,25 @@ class DailyApiTests(unittest.TestCase):
         )
         self.assertIn("sandbox.chebakov.me", response.headers["location"])
 
+    def test_math_generation_uses_the_dedicated_math_model(self) -> None:
+        generation = AsyncMock(return_value={"ok": True})
+        with patch.object(main, "_openai_json", generation):
+            result = asyncio.run(
+                main._openai_math_json(
+                    messages=[{"role": "user", "content": "Solve this."}],
+                    schema_name="math_test",
+                    schema={"type": "object"},
+                    max_tokens=100,
+                    reasoning_effort="high",
+                )
+            )
+
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(
+            generation.await_args.kwargs["model"],
+            main.OPENAI_MATH_MODEL,
+        )
+
     def test_daily_timer_start_is_server_enforced(self) -> None:
         initial = self.client.get("/api/daily/timers")
         started = self.client.post("/api/daily/timers/english-reading/start")
@@ -230,6 +249,62 @@ class DailyApiTests(unittest.TestCase):
                 "Шумер",
             )
         )
+
+    def test_recall_question_requires_russian(self) -> None:
+        self.assertTrue(
+            main._question_is_russian(
+                "Какая древняя цивилизация создала первые города Месопотамии?"
+            )
+        )
+        self.assertFalse(
+            main._question_is_russian(
+                "Яка давня цивілізація створила перші міста Месопотамії?"
+            )
+        )
+        self.assertFalse(
+            main._question_is_russian(
+                "Which ancient civilization created the first Mesopotamian cities?"
+            )
+        )
+
+    def test_recall_question_uses_plain_quotes(self) -> None:
+        self.assertEqual(
+            main._normalize_recall_punctuation(
+                "Как называли «царя», оставившего “свод законов”?"
+            ),
+            'Как называли "царя", оставившего "свод законов"?',
+        )
+
+    def test_recall_question_retries_non_russian_output(self) -> None:
+        generation = AsyncMock(
+            side_effect=[
+                {"question": "Qual nome tem origem em um antigo antropônimo?"},
+                {
+                    "question": (
+                        "Какое имя происходит от древнего германского антропонима "
+                        "со значением правителя дома?"
+                    )
+                },
+            ]
+        )
+        target = main.ConceptCueTarget(
+            id="concept-id",
+            concept="Henri Prestes",
+            recallDate="2026-08-15",
+            previousQuestions=[],
+        )
+
+        with patch.object(main, "_openai_json", generation):
+            question = asyncio.run(main._generate_concept_question(target))
+
+        self.assertEqual(
+            question,
+            (
+                "Какое имя происходит от древнего германского антропонима "
+                "со значением правителя дома?"
+            ),
+        )
+        self.assertEqual(generation.await_count, 2)
 
     def test_short_topic_discards_accidental_cue_points(self) -> None:
         generated = {

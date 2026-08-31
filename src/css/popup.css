@@ -16,7 +16,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: var(--background-color);
   color: var(--text-color);
   width: 400px;
@@ -180,7 +180,9 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .feature-toggle {
@@ -228,7 +230,10 @@ input:checked + .slider:before {
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
   box-shadow: 0 8px 20px rgba(234, 88, 12, 0.25);
 }
 
@@ -295,7 +300,9 @@ footer {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -344,7 +351,10 @@ footer {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.2s ease,
+    opacity 0.15s ease;
 }
 
 .vocab-action-button:hover:not(:disabled) {
@@ -409,8 +419,16 @@ body.quiz-page-body {
   padding: 48px 16px;
   overflow: auto;
   background:
-    radial-gradient(circle at 20% 15%, rgba(99, 102, 241, 0.15), transparent 50%),
-    radial-gradient(circle at 85% 90%, rgba(14, 165, 233, 0.12), transparent 55%),
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(99, 102, 241, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 85% 90%,
+      rgba(14, 165, 233, 0.12),
+      transparent 55%
+    ),
     var(--background-color);
   display: grid;
   place-items: center;
@@ -493,6 +511,32 @@ main.quiz-page {
   display: none;
 }
 
+.vocab-pronunciation {
+  font-size: 13px;
+  color: var(--muted-text);
+}
+
+.vocab-pronunciation[hidden] {
+  display: none;
+}
+
+.vocab-source-attribution {
+  color: var(--muted-text);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.vocab-source-attribution a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.vocab-source-attribution[hidden] {
+  display: none;
+}
+
 .vocab-speak {
   display: inline-flex;
   align-items: center;
@@ -505,7 +549,9 @@ main.quiz-page {
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .vocab-speak:hover:not(:disabled) {
@@ -562,7 +608,9 @@ main.quiz-page {
   font-size: 13px;
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .vocab-option:hover:not(:disabled) {

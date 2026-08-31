@@ -1,55 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vocab Quiz — LiterateGoggles</title>
-  <link rel="stylesheet" href="css/popup.css">
-</head>
-<body class="quiz-page-body">
-  <main class="quiz-page">
-    <header class="quiz-header">
-      <h1 class="quiz-title">Vocab quiz</h1>
-      <p class="quiz-subtitle">LiterateGoggles · English → Russian</p>
-    </header>
-    <div class="vocab-card quiz-card">
-      <div class="vocab-progress" id="vocab-progress" hidden>
-        <span class="vocab-progress-counter" id="vocab-progress-counter">0 / 0</span>
-        <span class="vocab-progress-score" id="vocab-progress-score">Score: 0</span>
-      </div>
-      <div class="vocab-body" id="vocab-body">
-        <div class="vocab-word-block">
-          <div class="vocab-word" id="vocab-word">—</div>
-          <div class="vocab-base" id="vocab-base" hidden>—</div>
-          <button type="button" class="vocab-speak" id="vocab-speak" title="Play pronunciation (British)" aria-label="Play pronunciation (British)">
-            <span aria-hidden="true">🔊</span>
-            <span>Play (British)</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vocab Quiz — LiterateGoggles</title>
+    <link rel="stylesheet" href="css/popup.css" />
+  </head>
+  <body class="quiz-page-body">
+    <main class="quiz-page">
+      <header class="quiz-header">
+        <h1 class="quiz-title">Vocab quiz</h1>
+        <p class="quiz-subtitle">
+          LiterateGoggles · English and French → Russian
+        </p>
+      </header>
+      <div class="vocab-card quiz-card">
+        <div class="vocab-progress" id="vocab-progress" hidden>
+          <span class="vocab-progress-counter" id="vocab-progress-counter"
+            >0 / 0</span
+          >
+          <span class="vocab-progress-score" id="vocab-progress-score"
+            >Score: 0</span
+          >
+        </div>
+        <div class="vocab-body" id="vocab-body">
+          <div class="vocab-word-block">
+            <div class="vocab-word" id="vocab-word">—</div>
+            <div class="vocab-base" id="vocab-base" hidden>—</div>
+            <div class="vocab-pronunciation" id="vocab-pronunciation" hidden>
+              —
+            </div>
+            <button
+              type="button"
+              class="vocab-speak"
+              id="vocab-speak"
+              title="Play pronunciation (British)"
+              aria-label="Play pronunciation (British)"
+            >
+              <span aria-hidden="true">🔊</span>
+              <span>Play (British)</span>
+            </button>
+          </div>
+          <button type="button" class="vocab-reveal" id="vocab-reveal">
+            Reveal choices
           </button>
+          <div class="vocab-options" id="vocab-options" hidden></div>
+          <div class="vocab-feedback" id="vocab-feedback" hidden></div>
+          <div class="vocab-examples" id="vocab-examples" hidden>
+            <div class="vocab-examples-title">Used in a sentence</div>
+            <ol class="vocab-examples-list" id="vocab-examples-list"></ol>
+          </div>
+          <button type="button" class="vocab-next" id="vocab-next" hidden>
+            Next word
+          </button>
+          <div
+            class="vocab-source-attribution"
+            id="vocab-source-attribution"
+            hidden
+          ></div>
         </div>
-        <button type="button" class="vocab-reveal" id="vocab-reveal">Reveal choices</button>
-        <div class="vocab-options" id="vocab-options" hidden></div>
-        <div class="vocab-feedback" id="vocab-feedback" hidden></div>
-        <div class="vocab-examples" id="vocab-examples" hidden>
-          <div class="vocab-examples-title">Used in a sentence</div>
-          <ol class="vocab-examples-list" id="vocab-examples-list"></ol>
+        <div class="vocab-summary" id="vocab-summary" hidden>
+          <div class="vocab-summary-title">Session complete</div>
+          <div class="vocab-summary-score" id="vocab-summary-score">
+            0 / 0 correct
+          </div>
+          <div class="vocab-summary-percent" id="vocab-summary-percent">0%</div>
+          <div class="vocab-summary-actions">
+            <button type="button" class="vocab-reveal" id="vocab-restart">
+              Study again
+            </button>
+            <button type="button" class="vocab-next" id="vocab-summary-close">
+              Close tab
+            </button>
+          </div>
         </div>
-        <button type="button" class="vocab-next" id="vocab-next" hidden>Next word</button>
       </div>
-      <div class="vocab-summary" id="vocab-summary" hidden>
-        <div class="vocab-summary-title">Session complete</div>
-        <div class="vocab-summary-score" id="vocab-summary-score">0 / 0 correct</div>
-        <div class="vocab-summary-percent" id="vocab-summary-percent">0%</div>
-        <div class="vocab-summary-actions">
-          <button type="button" class="vocab-reveal" id="vocab-restart">Study again</button>
-          <button type="button" class="vocab-next" id="vocab-summary-close">Close tab</button>
-        </div>
-      </div>
-    </div>
-  </main>
-  <script src="js/vocab.js"></script>
-  <script src="js/vocab-c1.js"></script>
-  <script src="js/vocab-c2.js"></script>
-  <script src="js/vocab-pte.js"></script>
-  <script src="js/quiz.js"></script>
-</body>
+    </main>
+    <script src="js/vocab.js"></script>
+    <script src="js/vocab-c1.js"></script>
+    <script src="js/vocab-c2.js"></script>
+    <script src="js/vocab-pte.js"></script>
+    <script src="js/vocab-fr-basic.js"></script>
+    <script src="js/quiz.js"></script>
+  </body>
 </html>

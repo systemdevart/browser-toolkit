@@ -219,30 +219,6 @@
     ]
   },
   {
-    "id": "algoday",
-    "title": "Algorithm day",
-    "language": "en",
-    "sourceTitle": "Competitive Programmer's Handbook",
-    "authors": "Antti Laaksonen",
-    "sourceUrl": "https://cses.fi/book/",
-    "availability": "Free full book",
-    "license": "Free educational book",
-    "files": [
-      {
-        "url": "https://cses.fi/book.pdf",
-        "filename": "competitive-programmers-handbook.pdf",
-        "kind": "pdf"
-      }
-    ],
-    "topics": [
-      "algorithmic complexity",
-      "dynamic programming",
-      "graph algorithms",
-      "range queries",
-      "string algorithms"
-    ]
-  },
-  {
     "id": "ml-problems-day",
     "title": "ML problems day",
     "language": "en",

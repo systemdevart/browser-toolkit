@@ -1,54 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LiterateGoggles</title>
-  <link rel="stylesheet" href="css/popup.css">
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>LiterateGoggles</h1>
-      <p class="tagline">Tune the sites you use to match the way you think.</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LiterateGoggles</title>
+    <link rel="stylesheet" href="css/popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>LiterateGoggles</h1>
+        <p class="tagline">
+          Tune the sites you use to match the way you think.
+        </p>
+      </header>
 
-    <main>
-      <section class="card global-card">
-        <label class="toggle-row" for="global-toggle">
-          <div class="toggle-info">
-            <img id="state-icon" src="icons/on.png" alt="Extension active" class="toggle-icon">
-            <div class="toggle-copy">
-              <span class="toggle-title">Enable LiterateGoggles</span>
-              <span class="toggle-caption" id="global-status">Active on supported pages</span>
+      <main>
+        <section class="card global-card">
+          <label class="toggle-row" for="global-toggle">
+            <div class="toggle-info">
+              <img
+                id="state-icon"
+                src="icons/on.png"
+                alt="Extension active"
+                class="toggle-icon"
+              />
+              <div class="toggle-copy">
+                <span class="toggle-title">Enable LiterateGoggles</span>
+                <span class="toggle-caption" id="global-status"
+                  >Active on supported pages</span
+                >
+              </div>
             </div>
+            <div class="toggle-switch">
+              <input type="checkbox" id="global-toggle" checked />
+              <span class="slider"></span>
+            </div>
+          </label>
+        </section>
+
+        <section class="card feature-card">
+          <div class="feature-header">
+            <h2>Available tweaks</h2>
+            <p>Edit <code>src/js/features.js</code> to grow your toolkit.</p>
           </div>
-          <div class="toggle-switch">
-            <input type="checkbox" id="global-toggle" checked>
-            <span class="slider"></span>
-          </div>
-        </label>
-      </section>
+          <ul class="feature-list" id="feature-list"></ul>
+        </section>
+      </main>
 
-      <section class="card feature-card">
-        <div class="feature-header">
-          <h2>Available tweaks</h2>
-          <p>Edit <code>src/js/features.js</code> to grow your toolkit.</p>
-        </div>
-        <ul class="feature-list" id="feature-list"></ul>
-      </section>
-    </main>
+      <footer>
+        <p class="footer-note">More experiments welcome.</p>
+      </footer>
+    </div>
 
-    <footer>
-      <p class="footer-note">More experiments welcome.</p>
-    </footer>
-  </div>
-
-  <script src="js/features.js"></script>
-  <script src="js/vocab.js"></script>
-  <script src="js/vocab-c1.js"></script>
-  <script src="js/vocab-c2.js"></script>
-  <script src="js/vocab-pte.js"></script>
-  <script src="js/popup.js"></script>
-</body>
+    <script src="js/features.js"></script>
+    <script src="js/vocab.js"></script>
+    <script src="js/vocab-c1.js"></script>
+    <script src="js/vocab-c2.js"></script>
+    <script src="js/vocab-pte.js"></script>
+    <script src="js/vocab-fr-basic.js"></script>
+    <script src="js/popup.js"></script>
+  </body>
 </html>

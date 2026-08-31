@@ -14,7 +14,7 @@ IELTS pipelines proxied by `sandbox.chebakov.me`.
 | `GET` | `/auth/logout` | Clear the shared daily/sandbox session |
 | `GET` | `/api/health` | Service and provider-key readiness |
 | `GET` | `/api/daily` | Return today's cached digest, generating it when stale |
-| `GET` | `/api/daily/math` | Return 30 daily source-grounded problems and solutions |
+| `GET` | `/api/daily/math` | Return 27 daily source-grounded problems and solutions |
 | `POST` | `/api/daily/math/problems/{problemId}/solution-opened` | Save that a worked solution was opened |
 | `GET` | `/api/daily/chess` | Return five repertoire-matched game positions and five theory positions |
 | `GET` | `/api/daily/opening-names` | Sample a named Lichess opening position and optional book continuation |
@@ -28,7 +28,7 @@ IELTS pipelines proxied by `sandbox.chebakov.me`.
 | `POST` | `/api/vocab/bans/<sourceId>` | Ban `{ "word": … }` |
 | `DELETE` | `/api/vocab/bans/<sourceId>` | Clear one source |
 | `DELETE` | `/api/vocab/bans/<sourceId>/<word>` | Unban one word |
-| `POST` | `/api/ielts/topic` | Generate a Speaking Part 1, 2, or 3 topic with GPT-5.6 Sol |
+| `POST` | `/api/ielts/topic` | Generate a Speaking Part 1, 2, or 3 topic with GPT-5.6 Terra |
 | `POST` | `/api/ielts/topic/audio` | Read a speaking topic with a random British ElevenLabs voice |
 | `POST` | `/api/ielts/transcribe` | Transcribe audio and assess audible delivery with OpenAI |
 | `POST` | `/api/ielts/evaluate` | Combine transcript and audio evidence into band-7.5 feedback |
@@ -44,7 +44,7 @@ transcription/audio assessment and final evaluation separately so it can show
 the real pipeline stage and retry evaluation without uploading audio again.
 Recordings are not persisted by the backend. GPT-4o Transcribe produces the
 text, GPT-Audio-1.5 listens for pronunciation, rhythm, intelligibility, and
-naturalness, and GPT-5.6 Sol produces structured IELTS feedback plus a complete
+naturalness, and GPT-5.6 Terra produces structured IELTS feedback plus a complete
 band-7.5 response rewritten with the smallest necessary changes.
 Provider-backed routes have a small per-IP, in-memory hourly limit as a second
 cost ceiling behind the private-site authentication layer.
@@ -58,11 +58,12 @@ and its sandbox IELTS routes without exposing Google tokens to JavaScript.
 
 Concept memory uses active retrieval rather than passive rereading. A new
 concept is first due tomorrow. On each due date, a bounded background worker
-uses GPT-5.6 Sol to generate one new indirect identification question without
+uses GPT-5.6 Terra to generate one new indirect identification question without
 blocking concept reads or saves. The question is checked for direct target-name
-leakage and persisted before it reaches the page. Prior questions are supplied
-to the model to prevent repetition; given names and surnames use etymological
-clues. Successful recalls then use gaps of 3, 7, 14, 30, 60, and 120 days. A
+leakage and Russian-language output before it reaches the page. Every question
+is Russian even when the concept comes from another language. Prior questions
+are supplied to the model to prevent repetition; given names and surnames use
+etymological clues. Successful recalls then use gaps of 3, 7, 14, 30, 60, and 120 days. A
 missed recall keeps the current stage and returns the concept tomorrow. The last
 successful recall marks the concept completed and removes it from the active
 queue while preserving completion and review history for statistics.
@@ -86,7 +87,7 @@ history endpoint; the stored structured fields are ready for a future private
 progress view.
 
 The daily digest fetches both Wikipedia date pages, Hugging Face Daily Papers,
-the Hugging Face blog, and alphaXiv. GPT-5.6 Sol selects and writes
+the Hugging Face blog, and alphaXiv. GPT-5.6 Terra selects and writes
 self-contained summaries. Free car images are resolved separately through
 Wikipedia's PageImages API, so the model never supplies image URLs. The result
 and persistent non-repetition history are stored in `api/daily.json`. A
@@ -97,7 +98,7 @@ has not finished.
 The same digest fetches the complete "Русские пословицы" and alphabetical
 "English proverbs" Wikiquote pages at daily creation time, extracts their
 top-level proverb entries, and samples three unseen entries from each large
-pool. GPT-5.6 Sol then adds an opposite-language translation, a concise
+pool. GPT-5.6 Terra then adds an opposite-language translation, a concise
 meaning, and a careful origin or usage note. Source wording and identifiers
 remain server-controlled, so the model cannot replace the sampled proverb.
 Selection history is stored alongside the digest in `api/daily.json`.
@@ -128,12 +129,6 @@ texts are indexed for Zorich and the substantively identical 2021 edition of
 Demidovich's 2022 sterile reprint. Kaczor and Nowak is indexed from official
 publisher-controlled preview material because no unrestricted legal full
 download is available.
-
-Algorithm day is a fixed mix: one problem from Competitive Programmer's
-Handbook, one LeetCode Medium problem, and one LeetCode Hard problem. The
-backend chooses the LeetCode pair deterministically without repetition and
-requires syntactically valid Python 3 for every main and follow-up solution.
-The curated public problem catalog lives in `api/leetcode_problems.json`.
 
 The saved daily set, non-repetition keys, and per-problem solution-open state
 live in `api/math_daily.json`. Opening the main worked solution counts the
@@ -188,7 +183,8 @@ AUTH_ALLOWED_EMAIL=you@example.com
 AUTH_SESSION_SECRET=<at-least-32-random-characters>
 
 # Optional overrides
-OPENAI_TEXT_MODEL=gpt-5.6-sol
+OPENAI_TEXT_MODEL=gpt-5.6-terra
+OPENAI_MATH_MODEL=gpt-5.6-sol
 OPENAI_TEXT_REASONING_EFFORT=low
 OPENAI_TRANSCRIPTION_MODEL=gpt-4o-transcribe
 OPENAI_AUDIO_MODEL=gpt-audio-1.5

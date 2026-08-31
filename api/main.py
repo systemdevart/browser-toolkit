@@ -192,7 +192,8 @@ CHESS_COM_USERNAME = _configuration(
     "unlimited_bezdarnost",
 )
 OPENAI_API_KEY = _configuration("OPENAI_API_KEY")
-OPENAI_TEXT_MODEL = _configuration("OPENAI_TEXT_MODEL", "gpt-5.6-sol")
+OPENAI_TEXT_MODEL = _configuration("OPENAI_TEXT_MODEL", "gpt-5.6-terra")
+OPENAI_MATH_MODEL = _configuration("OPENAI_MATH_MODEL", "gpt-5.6-sol")
 OPENAI_TEXT_REASONING_EFFORT = _configuration(
     "OPENAI_TEXT_REASONING_EFFORT", "low"
 ).lower()
@@ -1107,12 +1108,13 @@ async def _openai_json(
     schema_name: str,
     schema: dict[str, Any],
     max_tokens: int,
+    model: str | None = None,
     reasoning_effort: str | None = None,
     verbosity: str = "medium",
 ) -> dict[str, Any]:
     api_key = _require_provider_key(OPENAI_API_KEY, "OpenAI")
     payload = {
-        "model": OPENAI_TEXT_MODEL,
+        "model": model or OPENAI_TEXT_MODEL,
         "input": messages,
         "reasoning": {"effort": reasoning_effort or OPENAI_TEXT_REASONING_EFFORT},
         "text": {
@@ -1161,6 +1163,10 @@ async def _openai_json(
         ) from exc
 
 
+async def _openai_math_json(**kwargs: Any) -> dict[str, Any]:
+    return await _openai_json(model=OPENAI_MATH_MODEL, **kwargs)
+
+
 daily_service = DailyDigestService(
     data_file=DAILY_DATA_FILE,
     timezone_name=DAILY_TIMEZONE,
@@ -1171,7 +1177,7 @@ daily_math_service = DailyMathService(
     manifest_file=MATH_SOURCES_FILE,
     resources_dir=MATH_RESOURCES_DIR,
     timezone_name=DAILY_TIMEZONE,
-    json_generator=_openai_json,
+    json_generator=_openai_math_json,
 )
 chess_drill_service = ChessDrillService(
     data_file=CHESS_DRILLS_DATA_FILE,
@@ -1897,6 +1903,40 @@ def _question_exposes_concept(question: str, concept: str) -> bool:
     return any(token in normalized_question for token in significant_tokens)
 
 
+def _question_is_russian(question: str) -> bool:
+    cyrillic_letters = re.findall(r"[А-Яа-яЁё]", question)
+    latin_letters = re.findall(r"[A-Za-z]", question)
+    if len(cyrillic_letters) < 12:
+        return False
+    if len(latin_letters) > max(6, len(cyrillic_letters) // 3):
+        return False
+    if re.search(r"[ІіЇїЄєҐґ]", question):
+        return False
+    if re.search(
+        r"\b(?:який|яка|яке|які|яку|чому|назвіть|походить|прізвище)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return False
+    return True
+
+
+def _normalize_recall_punctuation(question: str) -> str:
+    return question.translate(
+        str.maketrans(
+            {
+                "«": '"',
+                "»": '"',
+                "“": '"',
+                "”": '"',
+                "„": '"',
+                "‘": "'",
+                "’": "'",
+            }
+        )
+    )
+
+
 async def _generate_concept_question(target: ConceptCueTarget) -> str:
     rejected_questions: list[str] = []
     for _ in range(3):
@@ -1914,9 +1954,11 @@ async def _generate_concept_question(target: ConceptCueTarget) -> str:
                         "properties, historical context, mechanisms, consequences, or "
                         "examples. If the target is a given name or surname, make the "
                         "question specifically about its etymology: language of origin, "
-                        "root meaning, or historical derivation. Write in the same "
-                        "language and script as the target when practical. Return only "
-                        "the question in the requested JSON shape."
+                        "root meaning, or historical derivation. Always write the entire "
+                        "question in natural Russian, regardless of the target's language "
+                        "or origin. Never switch to Ukrainian, English, Portuguese, or "
+                        "another language. Return only the question in the requested JSON "
+                        "shape."
                     ),
                 },
                 {
@@ -1931,6 +1973,7 @@ async def _generate_concept_question(target: ConceptCueTarget) -> str:
                                 "Do not mention or visibly derive the target name.",
                                 "Use a substantially different angle from every prior question.",
                                 "Ask exactly one self-contained question.",
+                                "Write the question only in Russian.",
                             ],
                         },
                         ensure_ascii=False,
@@ -1950,12 +1993,15 @@ async def _generate_concept_question(target: ConceptCueTarget) -> str:
             reasoning_effort="medium",
             verbosity="low",
         )
-        question = str(generated.get("question") or "").strip()
+        question = _normalize_recall_punctuation(
+            str(generated.get("question") or "").strip()
+        )
         previous_normalized = {
             _normalized_recall_text(item) for item in target.previousQuestions
         }
         if (
             12 <= len(question) <= 500
+            and _question_is_russian(question)
             and not _question_exposes_concept(question, target.concept)
             and _normalized_recall_text(question) not in previous_normalized
         ):

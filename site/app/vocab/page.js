@@ -11,7 +11,7 @@ export default function VocabPage() {
       <main className="page-main">
         <header className="site-header">
           <h1 className="site-title">Vocab quiz</h1>
-          <p className="site-subtitle">English → Russian</p>
+          <p className="site-subtitle">English and French → Russian</p>
         </header>
         <VocabQuiz />
         <Link className="back-link" href="/">

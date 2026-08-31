@@ -1,50 +1,71 @@
 const QuizRuntime = globalThis.LiterateGoggles || {};
 const QUIZ_VOCAB_SOURCES = Array.isArray(QuizRuntime.vocabSources)
   ? QuizRuntime.vocabSources.filter(
-      (s) => s && typeof s.id === "string" && Array.isArray(s.items) && s.items.length,
+      (s) =>
+        s &&
+        typeof s.id === "string" &&
+        Array.isArray(s.items) &&
+        s.items.length
     )
   : [];
-const QUIZ_VOCAB_FALLBACK = Array.isArray(QuizRuntime.vocab) ? QuizRuntime.vocab : [];
+const QUIZ_VOCAB_FALLBACK = Array.isArray(QuizRuntime.vocab)
+  ? QuizRuntime.vocab
+  : [];
 const QUIZ_VOCAB_CURRENT_KEY = "literategoggles.features.englishVocab.current";
 
 function pickSourceItems(sourceId) {
   if (sourceId) {
     const match = QUIZ_VOCAB_SOURCES.find((s) => s.id === sourceId);
-    if (match) return { name: match.name, items: match.items };
+    if (match) return match;
   }
   if (QUIZ_VOCAB_SOURCES.length) {
-    const first = QUIZ_VOCAB_SOURCES[0];
-    return { name: first.name, items: first.items };
+    return QUIZ_VOCAB_SOURCES[0];
   }
-  return { name: "", items: QUIZ_VOCAB_FALLBACK };
+  return {
+    name: "",
+    items: QUIZ_VOCAB_FALLBACK,
+    speechLang: "en-GB",
+    speechLabel: "British English",
+    speechRate: 0.92,
+    exampleLabel: "Used in a sentence",
+  };
 }
 
 const speechSupported =
   typeof window !== "undefined" && "speechSynthesis" in window;
 
-function pickBritishVoice() {
+function pickVoice(language) {
   if (!speechSupported) return null;
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
+  const requested = language || "en-GB";
+  const prefix = requested.split("-")[0].toLowerCase();
+  const exact = (voice) => voice.lang.toLowerCase() === requested.toLowerCase();
+  const sameLanguage = (voice) =>
+    voice.lang.toLowerCase().split("-")[0] === prefix;
   return (
-    voices.find((v) => v.lang === "en-GB" && /Google/i.test(v.name)) ||
-    voices.find((v) => v.lang === "en-GB" && /Daniel|Kate|Serena|Oliver|Arthur/i.test(v.name)) ||
-    voices.find((v) => v.lang === "en-GB") ||
-    voices.find((v) => /^en-GB/i.test(v.lang)) ||
-    voices.find((v) => /British|UK/i.test(v.name)) ||
+    voices.find(
+      (voice) => exact(voice) && /Google|Microsoft|Apple/i.test(voice.name)
+    ) ||
+    voices.find(exact) ||
+    voices.find(
+      (voice) =>
+        sameLanguage(voice) && /Google|Microsoft|Apple/i.test(voice.name)
+    ) ||
+    voices.find(sameLanguage) ||
     null
   );
 }
 
-function speakWord(text) {
+function speakWord(text, language = "en-GB", rate = 0.92) {
   if (!speechSupported || !text) return;
   try {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-GB";
-    utter.rate = 0.92;
+    utter.lang = language;
+    utter.rate = Number(rate) || 0.92;
     utter.pitch = 1;
-    const voice = pickBritishVoice();
+    const voice = pickVoice(language);
     if (voice) utter.voice = voice;
     window.speechSynthesis.speak(utter);
   } catch (error) {
@@ -71,13 +92,23 @@ function quizShuffle(items) {
   return copy;
 }
 
-function quizFromItem(item) {
+function quizFromItem(item, source = {}) {
   return {
     word: item.word,
     base: typeof item.base === "string" ? item.base.trim() : "",
+    pronunciation:
+      typeof item.pronunciation === "string" ? item.pronunciation.trim() : "",
     correct: item.correct,
     options: quizShuffle([item.correct, ...item.wrong]),
     examples: Array.isArray(item.examples) ? item.examples : [],
+    speechLang: source.speechLang || "en-GB",
+    speechLabel: source.speechLabel || "British English",
+    speechRate: source.speechRate || 0.92,
+    exampleLabel: source.exampleLabel || "Used in a sentence",
+    sourceUrl: source.sourceUrl || "",
+    attribution: source.attribution || "",
+    license: source.license || "",
+    licenseUrl: source.licenseUrl || "",
   };
 }
 
@@ -116,12 +147,15 @@ async function requestFreshQuiz() {
       error
     );
   }
-  const fallback = pickSourceItems(null).items;
-  if (!fallback.length) {
+  const fallbackSource = pickSourceItems(null);
+  if (!fallbackSource.items.length) {
     return null;
   }
-  const item = fallback[Math.floor(Math.random() * fallback.length)];
-  return quizFromItem(item);
+  const item =
+    fallbackSource.items[
+      Math.floor(Math.random() * fallbackSource.items.length)
+    ];
+  return quizFromItem(item, fallbackSource);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -136,7 +170,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextButton = document.getElementById("vocab-next");
   const speakButton = document.getElementById("vocab-speak");
   const baseEl = document.getElementById("vocab-base");
+  const pronunciationEl = document.getElementById("vocab-pronunciation");
   const examplesEl = document.getElementById("vocab-examples");
+  const examplesTitle = document.querySelector(".vocab-examples-title");
+  const attributionEl = document.getElementById("vocab-source-attribution");
   const examplesList = document.getElementById("vocab-examples-list");
   const summaryEl = document.getElementById("vocab-summary");
   const summaryScore = document.getElementById("vocab-summary-score");
@@ -220,18 +257,60 @@ document.addEventListener("DOMContentLoaded", () => {
         baseEl.hidden = true;
       }
     }
+    if (pronunciationEl) {
+      const pronunciation =
+        quiz && quiz.pronunciation ? quiz.pronunciation : "";
+      pronunciationEl.textContent = pronunciation
+        ? `Pronunciation: ${pronunciation}`
+        : "";
+      pronunciationEl.hidden = !pronunciation;
+    }
     if (speakButton) {
       speakButton.disabled = !quiz || !speechSupported;
       speakButton.hidden = !speechSupported;
+      const label = quiz?.speechLabel || "British English";
+      speakButton.title = `Play pronunciation (${label})`;
+      speakButton.setAttribute("aria-label", speakButton.title);
+      const text = speakButton.querySelector("span:last-child");
+      if (text) text.textContent = `Play (${label})`;
+    }
+    if (examplesTitle) {
+      examplesTitle.textContent = quiz?.exampleLabel || "Used in a sentence";
+    }
+    if (attributionEl) {
+      attributionEl.replaceChildren();
+      if (quiz?.attribution && quiz?.sourceUrl) {
+        attributionEl.append("Source: ");
+        const sourceLink = document.createElement("a");
+        sourceLink.href = quiz.sourceUrl;
+        sourceLink.target = "_blank";
+        sourceLink.rel = "noreferrer";
+        sourceLink.textContent = quiz.attribution;
+        attributionEl.append(sourceLink);
+        if (quiz.license) {
+          attributionEl.append(" - ");
+          const licenseLink = document.createElement("a");
+          licenseLink.href = quiz.licenseUrl;
+          licenseLink.target = "_blank";
+          licenseLink.rel = "noreferrer";
+          licenseLink.textContent = quiz.license;
+          attributionEl.append(licenseLink);
+        }
+        attributionEl.hidden = false;
+      } else {
+        attributionEl.hidden = true;
+      }
     }
     if (!quiz) {
       revealButton.disabled = true;
       revealButton.textContent = "No vocab available";
     } else if (speechSupported) {
-      speakWord(quiz.word);
+      speakWord(quiz.word, quiz.speechLang, quiz.speechRate);
     }
     nextButton.textContent =
-      session && session.position + 1 >= session.total ? "See results" : "Next word";
+      session && session.position + 1 >= session.total
+        ? "See results"
+        : "Next word";
     updateProgress();
   }
 
@@ -291,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let quiz = null;
     if (requestedSource && activeItems.length) {
       const item = activeItems[Math.floor(Math.random() * activeItems.length)];
-      quiz = quizFromItem(item);
+      quiz = quizFromItem(item, activeSource);
     } else {
       quiz = (await readStoredQuiz()) || (await requestFreshQuiz());
     }
@@ -318,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const idx = session.order[session.position];
-    renderQuiz(quizFromItem(activeItems[idx]));
+    renderQuiz(quizFromItem(activeItems[idx], activeSource));
   }
 
   function advanceSession() {
@@ -354,7 +433,13 @@ document.addEventListener("DOMContentLoaded", () => {
   summaryCloseButton.addEventListener("click", closeTab);
   if (speakButton) {
     speakButton.addEventListener("click", () => {
-      if (currentQuiz) speakWord(currentQuiz.word);
+      if (currentQuiz) {
+        speakWord(
+          currentQuiz.word,
+          currentQuiz.speechLang,
+          currentQuiz.speechRate
+        );
+      }
     });
   }
   warmUpVoices();

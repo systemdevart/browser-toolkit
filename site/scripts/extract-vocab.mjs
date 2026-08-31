@@ -15,7 +15,13 @@ const ROOT = path.resolve(__dirname, "..");
 const SRC = path.resolve(ROOT, "..", "src", "js");
 const DST = path.resolve(ROOT, "public", "vocab");
 
-const SOURCES = ["vocab.js", "vocab-c1.js", "vocab-c2.js", "vocab-pte.js"];
+const SOURCES = [
+  "vocab.js",
+  "vocab-c1.js",
+  "vocab-c2.js",
+  "vocab-pte.js",
+  "vocab-fr-basic.js",
+];
 const MARKER_RE = /\/\*__LG_JSON__\*\/([\s\S]*?)\/\*__LG_END__\*\//;
 
 fs.mkdirSync(DST, { recursive: true });
@@ -40,7 +46,7 @@ for (const file of SOURCES) {
   const payload = JSON.parse(m[1]);
   fs.writeFileSync(out, JSON.stringify(payload));
   console.log(
-    `[extract-vocab] ${file} -> ${path.relative(ROOT, out)} (${payload.items?.length ?? 0} items)`,
+    `[extract-vocab] ${file} -> ${path.relative(ROOT, out)} (${payload.items?.length ?? 0} items)`
   );
   ok += 1;
 }

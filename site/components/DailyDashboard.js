@@ -13,7 +13,8 @@ const PRACTICE_LINKS = [
     href: "/vocab/",
     number: "01",
     title: "Vocabulary",
-    description: "Build recall with focused English to Russian practice.",
+    description:
+      "Build recall with focused English and French vocabulary practice.",
   },
   {
     href: "https://sandbox.chebakov.me/ielts-speaking/",
@@ -47,6 +48,8 @@ const SAYING_GROUPS = [
     note: "Catchphrases and proverbs",
   },
 ];
+
+const SHOW_CHESS_OPENING_RECALL = false;
 
 async function responseError(response) {
   try {
@@ -197,7 +200,7 @@ export default function DailyDashboard() {
 
       <DailyConceptMemory />
 
-      <DailyChessDrills />
+      {SHOW_CHESS_OPENING_RECALL && <DailyChessDrills />}
 
       <DailyOpeningNames />
 

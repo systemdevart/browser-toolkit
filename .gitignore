@@ -17,6 +17,7 @@ src/js/vocab.js
 src/js/vocab-c1.js
 src/js/vocab-c2.js
 src/js/vocab-pte.js
+src/js/vocab-fr-basic.js
 
 # Runtime state written by the FastAPI service
 api/bans.json

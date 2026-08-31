@@ -12,7 +12,7 @@ Common:
   --source-id ID        id embedded in the file so the extension can distinguish
                         multiple sources
   --source-name "Name"  human-readable name shown in the popup dropdown
-  --model MODEL         override the OpenAI model (default: GPT-5.6 Sol)
+  --model MODEL         override the OpenAI model (default: GPT-5.6 Terra)
 
 Backfill mode (--backfill-examples) only adds "examples" to existing items.
 """
@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = "gpt-5.6-sol"
+DEFAULT_MODEL = "gpt-5.6-terra"
 BATCH_SIZE = 40
 MAX_TEXT_CHARS = 45_000
 CHUNK_SIZE = 30_000
@@ -445,7 +445,7 @@ def write_vocab_js(meta: dict, items: list[dict], out_path: Path) -> None:
         "  if (!Array.isArray(globalThis.LiterateGoggles.vocabSources)) {\n"
         "    globalThis.LiterateGoggles.vocabSources = [];\n"
         "  }\n"
-        "  const source = { id: payload.meta.id, name: payload.meta.name, items: payload.items };\n"
+        "  const source = { ...payload.meta, items: payload.items };\n"
         "  const list = globalThis.LiterateGoggles.vocabSources;\n"
         "  const idx = list.findIndex((s) => s.id === source.id);\n"
         "  if (idx >= 0) list[idx] = source; else list.push(source);\n"

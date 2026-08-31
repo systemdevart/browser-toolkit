@@ -2,7 +2,7 @@
 """Generate PTE-style "Repeat Sentence" practice items with matching audio.
 
 Pipeline:
-  1. Ask GPT-5.6 Sol to write PTE-style academic English sentences.
+  1. Ask GPT-5.6 Terra to write PTE-style academic English sentences.
   2. Speak each sentence with ElevenLabs, rotating through a curated set of
      premade voices (UK/US/AU, mix of genders) so consecutive items don't
      sound identical.
@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_LLM = "gpt-5.6-sol"
+DEFAULT_LLM = "gpt-5.6-terra"
 
 ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 DEFAULT_TTS_MODEL = "eleven_multilingual_v2"

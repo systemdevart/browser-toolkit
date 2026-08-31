@@ -12,26 +12,25 @@ secure `HttpOnly` cookies.
 
 The homepage follows [DAILY.md](./DAILY.md) and combines:
 
-- direct access to IELTS vocabulary on `daily.chebakov.me`, plus speaking and
-  writing practice hosted exclusively on `sandbox.chebakov.me`, with
-  audio-only speaking prompts read by random British ElevenLabs voices;
-- five repertoire-matched drills from the latest 100 Chess.com games and five
-  deeper opening-theory drills, with local Stockfish comparison;
+- direct access to English vocabulary and a 1,000-word French A1 quiz on
+  `daily.chebakov.me`, plus speaking and writing practice hosted exclusively on
+  `sandbox.chebakov.me`, with audio-only speaking prompts read by random
+  British ElevenLabs voices;
+- a preserved but currently hidden repertoire-recall feature with five drills
+  from recent Chess.com games and five deeper theory drills;
 - bilingual "on this day" history from English and Russian Wikipedia;
 - three Russian and three English sayings sampled at daily creation from the
   full Wikiquote collections, with OpenAI-generated translation, meaning, and
   usage notes;
 - daily ML research selected from Hugging Face Papers, the Hugging Face blog,
   and alphaXiv;
-- 30 daily source-grounded mathematics and ML problems, with worked solutions
-  and transfer exercises; Algorithm day combines one book problem with one
-  LeetCode Medium and one LeetCode Hard problem, all with Python solutions.
-  Opening a worked solution is saved, while unopened problems carry into the
-  next daily set;
+- 27 daily source-grounded mathematics and ML problems, with worked solutions
+  and transfer exercises. Opening a worked solution is saved, while unopened
+  problems carry into the next daily set;
 - server-enforced 25-minute English- and Russian-reading timers, with a
   completion chime and durable SQLite history for future statistics;
 - a SQLite-backed active-recall queue for concepts learned during the day,
-  using OpenAI-generated indirect questions that change on each due date,
+  using Russian OpenAI-generated indirect questions that change on each due date,
   1, 3, 7, 14, 30, 60, and 120-day review gaps, next-day retries after misses,
   and automatic archival after full mastery;
 - random-depth, multiple-choice chess opening-name identification from
@@ -46,8 +45,8 @@ history persist in `api/daily.json`, preventing research, sayings, cars, and
 poetry from repeating across restarts. The chess book is checked in at
 `api/chess_repertoire.json`; daily chess state and non-repetition history live
 in `api/chess_drills.json`. All LLM generation uses
-OpenAI GPT-5.6 Sol through the Responses API; the problem studio uses high
-reasoning effort and keeps its own non-repetition history in
+OpenAI GPT-5.6 Terra through the Responses API; the problem studio keeps
+GPT-5.6 Sol with high reasoning effort and its own non-repetition history in
 `api/math_daily.json`. Provider credentials remain server-side.
 
 Successfully evaluated IELTS writing attempts are saved in
@@ -56,6 +55,12 @@ scores, feedback, and a minimal-change band-7.5 rewrite. This durable structure
 is ready for future progress charts without exposing essay history publicly.
 Concepts and their complete recall history are stored separately in
 `api/concept_memory.sqlite3`.
+
+The French beginner ranking and simple pronunciation spellings are adapted
+from the [Vocabcraft French A1 deck](https://vocabcraft.com/decks/french),
+licensed under CC BY-SA 4.0. Russian meanings, distractors, and short examples
+are generated with GPT-5.6 Terra; pronunciation playback uses the browser's
+standard French voice.
 
 See [api/README.md](./api/README.md) for local and production setup.
 
